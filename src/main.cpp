@@ -6,7 +6,7 @@
 int main(){
     Shift s = Shift(0);
 
-    s.fill(0xcafefbfb);
+    s.fill(0xffffffff);
     
     int b = 0;
     for(int i = 0; i < 8; i++){

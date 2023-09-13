@@ -40,12 +40,12 @@ class Shift{
             if(this->direction){
                 // Right shift
                 res = this->buffer & 0b1;
-                this->buffer = (this->buffer >> 1) + (input << 31);
+                this->buffer = (this->buffer >> 1) + (input ? 1 << 31 : 0);
             }
             else {
                 // Left shift
                 res = this->buffer & (const uint32_t)(1<<31);
-                this->buffer = (this->buffer << 1) + input;
+                this->buffer = (this->buffer << 1) + (input ? 1 : 0);
             }
 
             return res;
