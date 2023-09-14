@@ -12,7 +12,7 @@ class Shift{
     
 
     public:
-        Shift(bool direction){
+        Shift(const bool direction){
             // The only option is the shift direction
             // We define :
             //    0 -> left shift
@@ -21,16 +21,16 @@ class Shift{
             this->direction = direction;
         }
 
-        void fill(uint32_t input){
+        void fill(const uint32_t input){
             // Fill buffer with the input
             this->buffer = input;
         }
 
-        uint32_t get(){
+        const uint32_t get(){
             return this->buffer;
         }
 
-        bool shift(bool input){
+        const bool shift(const bool input){
             // Shift the register according to self.direction
             // Input is the new bit being shifted in
             // Output is the overflow bit

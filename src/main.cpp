@@ -1,22 +1,17 @@
 #include <iostream>
 
-#include "shift.cpp"
+#include "fifo.cpp"
 
 
 int main(){
-    Shift s = Shift(0);
+    FIFO f = FIFO();
 
-    s.fill(0xffffffff);
-    
-    int b = 0;
-    for(int i = 0; i < 8; i++){
-        b = (b << 1) + s.shift(0);
-    }
+    f.push(0xff, 7);
+    f.push(0xbeef, 16);
+    f.push(0xdead, 16);
+    f.push(0xdeadbeef, 32);
 
-    std::cout << "Buffer : " << std::hex << s.get() << std::endl;
-    std::cout << "b : " << b << std::endl;
-
-    //std::cout << "shift buffer : " << std::hex << s.get() << std::endl;
+    f.print();
 
     return 0;
 }
