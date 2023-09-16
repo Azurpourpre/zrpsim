@@ -6,11 +6,11 @@ set(LANGUAGE CXX)
 set(CMAKE_BUILD_TYPE Debug)
 
 set(SRCS
-    src/shift.cpp
-    src/fifo.cpp
-    src/gpio.cpp
     src/main.cpp
-    src/state_machine.cpp
 )
 
-add_executable(zrpsim ${SRCS})
+set(HEADERS
+    src/instructions.h
+)
+
+add_executable(zrpsim ${SRCS} ${HEADERS})

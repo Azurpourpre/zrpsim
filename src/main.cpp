@@ -1,17 +1,28 @@
 #include <iostream>
 
-#include "fifo.cpp"
+#include "state_machine.cpp"
+
+static const uint16_t JMPtest_program_instructions[] = {
+            //     .wrap_target
+    0x0002, //  0: jmp    2                          
+    0xa042, //  1: nop                               
+    0xa042, //  2: nop                               
+    0xa042, //  3: nop                               
+    0xa042, //  4: nop                               
+    0xa042, //  5: nop                               
+            //     .wrap
+};
 
 
 int main(){
-    FIFO f = FIFO();
 
-    f.push(0xff, 7);
-    f.push(0xbeef, 16);
-    f.push(0xdead, 16);
-    f.push(0xdeadbeef, 32);
+    FIFO TX = FIFO(), RX = FIFO();
+    StateMachine sm = StateMachine();
+    sm.connect(&TX, &RX, JMPtest_program_instructions, 0, 0);
 
-    f.print();
+    sm.print();
+    sm.run();
+    sm.print();
 
     return 0;
 }
