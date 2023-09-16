@@ -50,6 +50,39 @@ class Shift{
 
             return res;
         }
+
+        const uint32_t shift(const uint32_t input, uint8_t bitcount){
+            // Shift the register according to self.direction
+            // Input is the new bit being shifted in
+            // Output is the overflow bit
+
+            uint32_t res;
+
+            uint32_t mask = 0;
+
+            if(this->direction){
+                // Right shift
+
+                for(int i = 0; i < bitcount; i++){
+                    mask = (mask << 1) + 1;
+                }
+
+                res = this->buffer & mask;
+                this->buffer = (this->buffer >> bitcount) + ((input & mask) << bitcount);
+            }
+            else {
+                // Left shift
+
+                for(int i = 0; i < bitcount; i++) {
+                    mask = (mask >> 1) + (1 << 31);
+                }
+
+                res = this->buffer & mask;
+                this->buffer = (this->buffer << bitcount) + (input & mask);
+            }
+
+            return res;
+        }
 };
 
 #endif

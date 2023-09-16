@@ -39,7 +39,7 @@ class StateMachine {
                         jmp(ISR & ~instr_mask);
                         break;
                     case 0b001:
-                        wait(ISR & ~instr_mask)
+                        wait(ISR & ~instr_mask);
                         break;
                     case 0b010:
                         TODO("IN");
@@ -58,6 +58,9 @@ class StateMachine {
                                 TODO("PUSH");
                             }
                         }
+                        break;
+                    case 0b101:
+                        TODO("MOV");
                         break;
                     case 0b110:
                         TODO("IRQ");
@@ -83,7 +86,7 @@ class StateMachine {
         private:
         // Internal Registers
         Shift *pOSR, *pISR;
-        uint8_t OSR_counter, IRS_counter, stall_counter;
+        uint8_t OSR_counter, ISR_counter, stall_counter;
         uint32_t X, Y, PC;
 
         // External References
@@ -159,6 +162,93 @@ class StateMachine {
                 this->stall_counter = (ISR & delay_sideset_mask) >> 8;
             } 
             // Else we dont do anything bc we want to check at next cycle again
+        }
+
+        void in(const uint16_t ISR){
+            //Set the stall
+            this->stall_counter = (ISR & delay_sideset_mask) >> 8;
+
+            //Get bitcount and source
+            uint8_t bitcount = ISR & 0b11111;
+            bitcount = (bitcount == 0) ? 32 : bitcount;
+
+            switch ((ISR & 0b11100000) >> 5) {
+                case 0b000:
+                    TODO("GPIO");
+                    break;
+                case 0b001:
+                    this->pISR->shift(this->X, bitcount);
+                    break;
+                case 0b010:
+                    this->pISR->shift(this->Y, bitcount);
+                    break;
+                case 0b011:
+                    this->pISR->shift(0, bitcount);
+                    break;
+                case 0b100:
+                case 0b101:
+                    std::cerr << "Reserved value in IN" << std::endl;
+                    break;
+                case 0b110:
+                    (*this->pISR).shift(
+                        (*this->pISR).get(),
+                        bitcount);
+                    break;
+                case 0b111:
+                    (*this->pISR).shift(
+                        (*this->pOSR).get(),
+                        bitcount);
+                    break;
+            }
+
+            // Update ISR count
+            ISR_counter += bitcount;
+            ISR_counter = (ISR_counter > 32) ? 32 : ISR_counter;
+
+            //Update PC
+            this->PC ++;
+        }
+
+        void out(const uint16_t ISR){
+            //Set the stall
+            this->stall_counter = (ISR & delay_sideset_mask) >> 8;
+
+            //Get bitcount and destination
+            uint8_t bitcount = ISR & 0b11111;
+            bitcount = (bitcount == 0) ? 32 : bitcount;
+
+            switch ((ISR & 0b11100000) >> 5) {
+                case 0b000:
+                    TODO("GPIO");
+                    break;
+                case 0b001:
+                    this->X = this->pOSR->shift(0, bitcount);
+                    break;
+                case 0b010:
+                    this->Y = this->pOSR->shift(0, bitcount);
+                    break;
+                case 0b011:
+                    this->pOSR->shift(0, bitcount);
+                    break;
+                case 0b100:
+                    TODO("GPIO");
+                    break;
+                case 0b101:
+                    this->PC = this->pOSR->shift(0, bitcount);
+                    return;
+                case 0b110:
+                    this->pISR->shift(
+                        this->pOSR->shift(0, bitcount),
+                        bitcount
+                    );
+                    break;
+                case 0b111:
+                    TODO("OUT (j'ai rien compris)");
+                    break;
+            }
+
+            // Update PC
+            this->PC ++;
         }
     
 

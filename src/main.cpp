@@ -20,9 +20,10 @@ int main(){
     StateMachine sm = StateMachine();
     sm.connect(&TX, &RX, JMPtest_program_instructions, 0, 0);
 
-    sm.print();
-    sm.run();
-    sm.print();
+    for(int i = 0 ; i < 5 ; i++){
+        sm.print();
+        sm.run();
+    }
 
     return 0;
 }
