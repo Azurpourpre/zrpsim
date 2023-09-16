@@ -13,8 +13,8 @@ class StateMachine {
         void connect(FIFO* TX, FIFO* RX, const instr* progmem, bool ISR_dir, bool OSR_dir) {
             Shift ISR = Shift(ISR_dir);
             Shift OSR = Shift(OSR_dir);
-            this->pISR = &ISR;
-            this->pOSR = &OSR;
+            this->ISR = &ISR;
+            this->OSR = &OSR;
 
             this->TX_FIFO = TX;
             this->RX_FIFO = RX;
@@ -31,46 +31,10 @@ class StateMachine {
                 // Do the full thing
 
                 //Fetch
-                instr ISR = this->progmem[this->PC];
+                instr IR = this->progmem[this->PC];
 
                 //Decode & Execute
-                switch((ISR & instr_mask) >> 13){
-                    case 0b000:
-                        jmp(ISR & ~instr_mask);
-                        break;
-                    case 0b001:
-                        wait(ISR & ~instr_mask);
-                        break;
-                    case 0b010:
-                        TODO("IN");
-                        break;
-                    case 0b011:
-                        TODO("OUT");
-                        break;
-                    case 0b100:
-                        //Instruction can be push, pull or invalid instr
-                        if(ISR & 0b11111){
-                            std::cerr << "Invalid instruction !  " << std::hex << ISR << std::endl;
-                        } else {
-                            if(ISR & 0b10000000){
-                                TODO("PULL");
-                            } else {
-                                TODO("PUSH");
-                            }
-                        }
-                        break;
-                    case 0b101:
-                        TODO("MOV");
-                        break;
-                    case 0b110:
-                        TODO("IRQ");
-                        break;
-                    case 0b111:
-                        TODO("SET");
-                        break;
-                    default:
-                        std::cerr << "Invalid instruction !  " << std::hex << ISR << std::endl;
-                }
+                this->execute(IR);
 
             }
         }
@@ -85,7 +49,7 @@ class StateMachine {
 
         private:
         // Internal Registers
-        Shift *pOSR, *pISR;
+        Shift *OSR, *ISR;
         uint8_t OSR_counter, ISR_counter, stall_counter;
         uint32_t X, Y, PC;
 
@@ -95,13 +59,53 @@ class StateMachine {
 
         //Instructions
 
-        void jmp(const uint16_t ISR){
+        void execute(instr IR){
+            switch((IR & instr_mask) >> 13){
+                    case 0b000:
+                        jmp(IR & ~instr_mask);
+                        break;
+                    case 0b001:
+                        wait(IR & ~instr_mask);
+                        break;
+                    case 0b010:
+                        in(IR & ~instr_mask);
+                        break;
+                    case 0b011:
+                        out(IR & ~instr_mask);
+                        break;
+                    case 0b100:
+                        //Instruction can be push, pull or invalid instr
+                        if(IR & 0b11111){
+                            std::cerr << "Invalid instruction !  " << std::hex << IR << std::endl;
+                        } else {
+                            if(IR & 0b10000000){
+                                pull(IR & ~instr_mask);
+                            } else {
+                                push(IR & ~instr_mask);
+                            }
+                        }
+                        break;
+                    case 0b101:
+                        TODO("MOV");
+                        break;
+                    case 0b110:
+                        TODO("IRQ");
+                        break;
+                    case 0b111:
+                        TODO("SET");
+                        break;
+                    default:
+                        std::cerr << "Invalid instruction !  " << std::hex << IR << std::endl;
+                }
+        }
+
+        void jmp(const uint16_t IR){
             //Set the stall
-            this->stall_counter = (ISR & delay_sideset_mask) >> 8;
+            this->stall_counter = (IR & delay_sideset_mask) >> 8;
 
             //Check condition
             bool verified;
-            switch ((ISR & 0b11100000) >> 5){
+            switch ((IR & 0b11100000) >> 5){
                 case 0b000:
                     verified = true;
                     break;
@@ -133,17 +137,17 @@ class StateMachine {
             }
 
             if (verified) {
-                this->PC = ISR & 0b11111;
+                this->PC = IR & 0b11111;
             }
         }
 
-        void wait(const uint16_t ISR){
+        void wait(const uint16_t IR){
             //Check condition
-            bool pol = ISR & (1 << 7);
-            uint8_t index = ISR & 0b11111;
+            bool pol = IR & (1 << 7);
+            uint8_t index = IR & 0b11111;
             bool verified;
 
-            switch ((ISR & (0b11 << 5)) >> 5) {
+            switch ((IR & (0b11 << 5)) >> 5) {
                 case 0b00:
                     TODO("GPIO");
                     break;
@@ -159,44 +163,44 @@ class StateMachine {
 
             if (verified) {
                 this->PC ++;
-                this->stall_counter = (ISR & delay_sideset_mask) >> 8;
+                this->stall_counter = (IR & delay_sideset_mask) >> 8;
             } 
             // Else we dont do anything bc we want to check at next cycle again
         }
 
-        void in(const uint16_t ISR){
+        void in(const uint16_t IR){
             //Set the stall
-            this->stall_counter = (ISR & delay_sideset_mask) >> 8;
+            this->stall_counter = (IR & delay_sideset_mask) >> 8;
 
             //Get bitcount and source
-            uint8_t bitcount = ISR & 0b11111;
+            uint8_t bitcount = IR & 0b11111;
             bitcount = (bitcount == 0) ? 32 : bitcount;
 
-            switch ((ISR & 0b11100000) >> 5) {
+            switch ((IR & 0b11100000) >> 5) {
                 case 0b000:
                     TODO("GPIO");
                     break;
                 case 0b001:
-                    this->pISR->shift(this->X, bitcount);
+                    this->ISR->shift(this->X, bitcount);
                     break;
                 case 0b010:
-                    this->pISR->shift(this->Y, bitcount);
+                    this->ISR->shift(this->Y, bitcount);
                     break;
                 case 0b011:
-                    this->pISR->shift(0, bitcount);
+                    this->ISR->shift(0, bitcount);
                     break;
                 case 0b100:
                 case 0b101:
                     std::cerr << "Reserved value in IN" << std::endl;
                     break;
                 case 0b110:
-                    (*this->pISR).shift(
-                        (*this->pISR).get(),
+                    (*this->ISR).shift(
+                        (*this->ISR).get(),
                         bitcount);
                     break;
                 case 0b111:
-                    (*this->pISR).shift(
-                        (*this->pOSR).get(),
+                    (*this->ISR).shift(
+                        (*this->OSR).get(),
                         bitcount);
                     break;
             }
@@ -209,46 +213,107 @@ class StateMachine {
             this->PC ++;
         }
 
-        void out(const uint16_t ISR){
+        void out(const uint16_t IR){
             //Set the stall
-            this->stall_counter = (ISR & delay_sideset_mask) >> 8;
+            this->stall_counter = (IR & delay_sideset_mask) >> 8;
 
             //Get bitcount and destination
-            uint8_t bitcount = ISR & 0b11111;
+            uint8_t bitcount = IR & 0b11111;
             bitcount = (bitcount == 0) ? 32 : bitcount;
 
-            switch ((ISR & 0b11100000) >> 5) {
+            switch ((IR & 0b11100000) >> 5) {
                 case 0b000:
                     TODO("GPIO");
                     break;
                 case 0b001:
-                    this->X = this->pOSR->shift(0, bitcount);
+                    this->X = this->OSR->shift(0, bitcount);
                     break;
                 case 0b010:
-                    this->Y = this->pOSR->shift(0, bitcount);
+                    this->Y = this->OSR->shift(0, bitcount);
                     break;
                 case 0b011:
-                    this->pOSR->shift(0, bitcount);
+                    this->OSR->shift(0, bitcount);
                     break;
                 case 0b100:
                     TODO("GPIO");
                     break;
                 case 0b101:
-                    this->PC = this->pOSR->shift(0, bitcount);
+                    this->PC = this->OSR->shift(0, bitcount);
                     return;
                 case 0b110:
-                    this->pISR->shift(
-                        this->pOSR->shift(0, bitcount),
+                    this->ISR->shift(
+                        this->OSR->shift(0, bitcount),
                         bitcount
                     );
                     break;
                 case 0b111:
-                    TODO("OUT (j'ai rien compris)");
-                    break;
+                    this->execute(this->OSR->shift(0, bitcount));
+                    return;
             }
 
             // Update PC
             this->PC ++;
+        }
+
+        void push(const uint16_t IR){
+            //Set the stall
+            this->stall_counter = (IR & delay_sideset_mask) >> 8;
+
+            if ( (IR & 0b1000000) && (this->ISR_counter >= 32) ){
+                // If the isFull bit is set and ISR is below threshold
+                TODO("AutoPush");
+                return;
+
+            } else if ( (IR & 0b100000) && (this->RX_FIFO->get_size() <= 3*32) ){
+                // Block bit is set and TX FIFO is empty
+                // So stall
+                return;
+
+            } else {
+                // Everything is fine, so push ISR into RX FIFO
+                this->RX_FIFO->push(
+                    this->ISR->get(),
+                    32);
+
+                // And clear out ISR
+                this->ISR->fill(0);
+                this->ISR_counter = 0;
+
+                this->PC ++;
+            }
+
+        }
+
+        void pull(const uint16_t IR){
+            //Set the stall
+            this->stall_counter = (IR & delay_sideset_mask) >> 8;
+
+            if ( (IR & 0b1000000) && (this->ISR_counter <= 0) ){
+                // If the isEmpty bit is set and OSR is below threshold
+                TODO("AutoPush");
+                return;
+
+            } else if (this->TX_FIFO->get_size() == 0) {
+                //If TX FIFO is empty
+                //Look the block bit
+                if (IR & 0b100000) {
+                    //If the block bit is set, we stall
+                    return;
+                } else {
+                    // If the block bit is not set, we copy X to OSR
+                    this->OSR->fill(X);
+                    this->OSR_counter = 32;
+                    this->PC ++;
+                }
+            } else {
+                // TX fifo is not empty
+                // So we pull the TX FIFO into OSR
+                this->OSR->fill(
+                    this->TX_FIFO->pull(32)
+                );
+                this->OSR_counter = 32;
+                this->PC ++;
+            }
         }
     
 

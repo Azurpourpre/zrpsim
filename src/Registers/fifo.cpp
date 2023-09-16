@@ -7,8 +7,17 @@
 class FIFO {
     private:
         uint32_t buffer[4];
+        uint8_t size;
 
     public:
+        FIFO() {
+            this->size = 0;
+            this->buffer[0] = 0;
+            this->buffer[1] = 0;
+            this->buffer[2] = 0;
+            this->buffer[3] = 0;
+        }
+
         void push(const uint32_t value, const uint8_t size){
             if (size > 32) {
                 std::cerr << "Can't push more than 32 bits in the FIFO at once" << std::endl;
@@ -26,6 +35,8 @@ class FIFO {
             this->buffer[2] = ((this->buffer[2] & ~mask) >> size) | ((this->buffer[1] & mask) << (32 - size));
             this->buffer[1] = ((this->buffer[1] & ~mask) >> size) | ((this->buffer[0] & mask) << (32 - size));
             this->buffer[0] = ((this->buffer[0] & ~mask) >> size) | ((value & mask) << (32 - size));
+
+            this->size += size;
         }
     
         const uint32_t pull(const uint8_t size){
@@ -37,10 +48,17 @@ class FIFO {
             uint32_t mask = (1 << size) - 1;
 
             const uint32_t rep = this->buffer[3] & mask;
+            uint8_t old_size = this->size;
 
             this->push(0, size);
 
+            this->size = old_size - size;
+
             return rep;
+        }
+
+        uint8_t get_size(){
+            return this->size;
         }
 
         void print(){

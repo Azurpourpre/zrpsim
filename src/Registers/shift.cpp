@@ -19,6 +19,7 @@ class Shift{
             //    1 -> right shift
 
             this->direction = direction;
+            this->buffer = 0;
         }
 
         void fill(const uint32_t input){
