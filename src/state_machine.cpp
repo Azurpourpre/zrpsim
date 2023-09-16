@@ -138,6 +138,7 @@ class StateMachine {
             //Check condition
             bool pol = ISR & (1 << 7);
             uint8_t index = ISR & 0b11111;
+            bool verified;
 
             switch ((ISR & (0b11 << 5)) >> 5) {
                 case 0b00:
@@ -152,6 +153,12 @@ class StateMachine {
                 default:
                     std::cerr << "Invalid WAIT condition" << std::endl;
             }
+
+            if (verified) {
+                this->PC ++;
+                this->stall_counter = (ISR & delay_sideset_mask) >> 8;
+            } 
+            // Else we dont do anything bc we want to check at next cycle again
         }
     
 
