@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include <iostream>
-#include "electronic.h"
+#include "registers.h"
 #include "instructions.h"
 #include "utils.cpp"
 
@@ -41,7 +41,7 @@ class StateMachine {
 
         // Debug
         void print(){
-
+            std::cout << "### NEW STEP ###" << std::endl;
             std::cout << "PC : " << this->PC << std::endl;
             std::cout << "X : " << std::hex << this->X << std::endl;
             std::cout << "Y : " << std::hex << this->Y << std::endl;
@@ -86,13 +86,13 @@ class StateMachine {
                             }
                             break;
                         case 0b101:
-                            TODO("MOV");
+                            mov(IR & ~instr_mask);
                             break;
                         case 0b110:
-                            TODO("IRQ");
+                            irq(IR & ~instr_mask);
                             break;
                         case 0b111:
-                            TODO("SET");
+                            set(IR & ~instr_mask);
                             break;
                         default:
                             std::cerr << "Invalid instruction !  " << std::hex << IR << std::endl;
@@ -114,7 +114,8 @@ class StateMachine {
                         break;
                     case 0b010:
                         verified = (this->X != 0);
-                        this->X --;
+                        if(verified)
+                            this->X --;
                         break;
                     case 0b011:
                         verified = (this->Y == 0);
@@ -403,10 +404,16 @@ class StateMachine {
                         this->OSR_counter = 32;
                         break;
                 }
+
+                //Update PC
+                this->PC ++;
             }
 
             void irq(const uint16_t IR){
                 TODO("IRQ");
+
+                //Update PC
+                this->PC ++;
             }
 
             void set(const uint16_t IR){
@@ -435,6 +442,9 @@ class StateMachine {
                         std::cerr << "Reserved destination in SET" << std::endl;
                         break;
                 }
+
+                //Update PC
+                this->PC ++;
             }
 
 };
