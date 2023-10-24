@@ -17,12 +17,12 @@ class VCDWriter{
     private:
         std::ofstream outfile;
         char n_signal; //  Between 33 and 71?
-        std::unordered_map<VCDSignal*, uint32_t> state; // Vector of all signals
+        std::unordered_map<VCDSignal*, int> state; // Vector of all signals
 
     public:
         VCDWriter(const char* filename){
             this->outfile.open(filename, std::ios::out);
-            this->n_signal = 33;
+            this->n_signal = 0;
         }
 
         ~VCDWriter(){
@@ -51,7 +51,7 @@ class VCDWriter{
             this->outfile << "#0" << std::endl;
 
             for(auto [sig, _ ]: this->state){
-                write_value(sig, 0);
+                this->write_value(sig, 0);
             }
         }
 
@@ -78,9 +78,13 @@ class VCDWriter{
             }
         }
 
-        VCDSignal* create_signal(const uint8_t size, const char* name){
+        VCDSignal* create_signal(const uint8_t size, const char* wanted_name){
             // Instantiate signal
-            VCDSignal new_sig = {0, 0, n_signal, name};
+                // We copy the name bc never trust input
+            char* name = (char*)malloc(sizeof(wanted_name)/sizeof(const char));
+            memcpy(name, wanted_name, sizeof(wanted_name)/sizeof(const char));
+
+            VCDSignal new_sig = {0, 0, (char)(n_signal + 64), name};
 
             if(size >= 32){
                 new_sig.size = 32;
@@ -93,10 +97,10 @@ class VCDWriter{
             this->n_signal++;
 
             //Copy it to heap, for persistance
-            VCDSignal* rep = (VCDSignal*)calloc(1, sizeof(VCDSignal));
+            VCDSignal* rep = (VCDSignal*)malloc(sizeof(VCDSignal));
             memcpy(rep, &new_sig, sizeof(VCDSignal));
 
-            this->state[rep] = 1;
+            this->state[rep] = 2;
 
             return rep;
         }

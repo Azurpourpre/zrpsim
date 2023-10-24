@@ -13,4 +13,6 @@ set(HEADERS
     src/instructions.h
 )
 
+add_compile_options(-g)
+
 add_executable(zrpsim ${SRCS} ${HEADERS})

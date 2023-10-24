@@ -6,18 +6,35 @@
 #include "registers.h"
 #include "instructions.h"
 #include "utils.cpp"
+#include "GPIO/gpio.cpp"
 
 class StateMachine {
 
     public:
-        void connect(FIFO* TX, FIFO* RX, const instr* progmem, bool ISR_dir, bool OSR_dir) {
+        StateMachine(bool ISR_dir, bool OSR_dir, const unsigned int clock_divisor){
             Shift ISR = Shift(ISR_dir);
             Shift OSR = Shift(OSR_dir);
             this->ISR = &ISR;
             this->OSR = &OSR;
 
+            this->OSR_counter = 0; //Default value ?
+            this->ISR_counter = 0;
+            this->stall_counter = 0;
+            this->X = 0;
+            this->Y = 0;
+            this->PC = 0;
+            this->clock_div = clock_divisor;
+
+            this->TX_FIFO = nullptr;
+            this->RX_FIFO = nullptr;
+            this->progmem = nullptr;
+            this->gpio = nullptr;
+        }
+
+        void connect(FIFO* TX, FIFO* RX, GPIO* gpio, const instr* progmem) {
             this->TX_FIFO = TX;
             this->RX_FIFO = RX;
+            this->gpio = gpio;
             this->progmem = progmem;
         }
 
@@ -52,10 +69,12 @@ class StateMachine {
             Shift *OSR, *ISR;
             uint8_t OSR_counter, ISR_counter, stall_counter;
             uint32_t X, Y, PC;
+            unsigned int clock_div;
 
             // External References
             FIFO* TX_FIFO, *RX_FIFO;
             const instr* progmem;
+            GPIO* gpio;
 
             //Instructions
 
@@ -128,7 +147,7 @@ class StateMachine {
                         verified = (X!=Y);
                         break;
                     case 0b110:
-                        TODO("PIN");
+                        TODO("INPUT GPIO");
                         break;
                     case 0b111:
                         TODO("SHIFT REGISTER COUNTER");
@@ -150,10 +169,10 @@ class StateMachine {
 
                 switch ((IR & (0b11 << 5)) >> 5) {
                     case 0b00:
-                        TODO("GPIO");
+                        TODO("INPUT GPIO");
                         break;
                     case 0b01:
-                        TODO("GPIO");
+                        TODO("INPUT GPIO");
                         break;
                     case 0b10:
                         TODO("IRQ");
@@ -179,7 +198,7 @@ class StateMachine {
 
                 switch ((IR & 0b11100000) >> 5) {
                     case 0b000:
-                        TODO("GPIO");
+                        TODO("INPUT GPIO");
                         break;
                     case 0b001:
                         this->ISR->shift(this->X, bitcount);
@@ -220,7 +239,7 @@ class StateMachine {
 
                 //Get bitcount and destination
                 uint8_t bitcount = IR & 0b11111;
-                bitcount = (bitcount == 0) ? 32 : bitcount;
+                bitcount = (bitcount == 0b00000) ? 32 : bitcount;
 
                 switch ((IR & 0b11100000) >> 5) {
                     case 0b000:
@@ -251,6 +270,9 @@ class StateMachine {
                         this->execute(this->OSR->shift(0, bitcount));
                         return;
                 }
+
+                OSR_counter += bitcount;
+                OSR_counter = (OSR_counter > 32) ? 32 : OSR_counter;
 
                 // Update PC
                 this->PC ++;

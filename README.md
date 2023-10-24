@@ -15,6 +15,9 @@ This project is still very young, so it might crash, and a lot of features are s
 - [ ]  Interruptions
 - [ ] Status Registers
 - [ ] Autopush
+- [ ] Wrapping
+
+Maybe more ?
 
 ## References
 

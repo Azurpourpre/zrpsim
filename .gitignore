@@ -1,5 +1,7 @@
 CMakeFiles/**
 out/**
+test/**
+!test/*.asm
 cmake_install.cmake
 CMakeCache.txt
 Makefile
