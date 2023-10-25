@@ -8,7 +8,7 @@ This project is still very young, so it might crash, and a lot of features are s
 
 - [x]  Registers and FIFO
 - [x]  State machine fetch, decode, execute instructions
-- [ ]  GPIO output
+- [x]  GPIO output
     + [x]  VCD file output
 - [ ]  GPIO input
     + [ ]  Input from file
