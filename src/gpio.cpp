@@ -5,13 +5,16 @@
 #include <string>
 #include <cmath>
 #include <vector>
-#include "vcd.cpp"
-#include "../utils.cpp"
+#include "utils.cpp"
+#include "GPIO/vcd.cpp"
+#include "GPIO/input.cpp"
 
 class GPIO {
     public:
-        GPIO(VCDWriter* writer, const float freq){
+        GPIO(VCDWriter* writer, CustomReader_GPIO* reader, const float freq){
             this->writer = writer;
+            this->reader = reader;
+
             for(int i = 0; i < 30; i++){
                 const std::string name = "Pin_" + std::to_string(i);
                 this->siglist[i] = writer->create_signal(1, name.c_str());
@@ -22,6 +25,7 @@ class GPIO {
 
             writer->write_header(this->freq_to_ts(freq));
 
+            this->dt = 1/freq;
             this->t = 1;
 
 
@@ -41,7 +45,6 @@ class GPIO {
             unsigned int pin = 0;
 
             this->writer->write_time(std::to_string(t).c_str());
-            t++;
 
             while((diff != 0) && (pin < 30)){
                 // We have a changed bit !
@@ -56,11 +59,18 @@ class GPIO {
                 pin++;
                 diff = diff >> 1;
             }
+
+            this->t++;
             this->old_pinState = this->pinState;
+            this->pinState = this->reader->update_gpio_state(this->pinState, t*this->dt);
+
         }
+
     private:
         VCDWriter* writer;
+        CustomReader_GPIO* reader;
         unsigned int t;
+        float dt;
         uint32_t pinState;
         uint32_t old_pinState;
         VCDSignal* siglist[30];

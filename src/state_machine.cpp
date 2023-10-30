@@ -5,9 +5,9 @@
 #include <iostream>
 
 #include "registers.h"
-#include "instructions.h"
+#include "state_machine/instructions.h"
 #include "utils.cpp"
-#include "GPIO/gpio.cpp"
+#include "gpio.cpp"
 
 class StateMachine {
 

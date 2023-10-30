@@ -1,0 +1,20 @@
+$version
+    Handwritten v1
+$end
+
+$timescale 1ns $end
+$var wire 32 ! FIFO $end
+$var wire 1 % pin_1 $end
+
+$enddefinitions $end
+
+#0
+0x15!
+1%
+#2
+123456!
+#7
+0%
+#8
+1%
+444!

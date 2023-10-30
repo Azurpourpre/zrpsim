@@ -1,3 +1,7 @@
+#ifndef _VCD
+#define _VCD
+
+
 #include <fstream>
 #include <ctime>
 #include <iomanip>
@@ -16,7 +20,7 @@ typedef struct {
 class VCDWriter{
     private:
         std::ofstream outfile;
-        char n_signal; //  Between 33 and 71?
+        char n_signal;
         std::unordered_map<VCDSignal*, int> state; // Vector of all signals
 
     public:
@@ -107,3 +111,5 @@ class VCDWriter{
 
 
 };
+
+#endif

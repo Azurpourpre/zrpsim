@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "state_machine.cpp"
-#include "GPIO/gpio.cpp"
+#include "gpio.cpp"
 
 static const uint16_t io_test_program_instructions[] = {
             //     .wrap_target
@@ -21,7 +21,8 @@ int main(){
     FIFO TX = FIFO(), RX = FIFO();
     
     VCDWriter writer = VCDWriter("out/out.vcd");
-    GPIO gpio = GPIO(&writer, 133e6);
+    CustomReader_GPIO reader("in/in.test");
+    GPIO gpio = GPIO(&writer, &reader, 133e6);
     
     StateMachine sm = StateMachine(0,0,1);
     sm.connect(&TX, &RX, &gpio, io_test_program_instructions);
