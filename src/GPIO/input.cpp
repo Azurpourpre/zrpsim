@@ -14,7 +14,7 @@ class CustomReader_GPIO{
     private:
         std::ifstream infile;
         float dt = 1;
-        std::map<int, std::map<int, int>> playback_map = {};
+        std::map<int, std::map<int, uint32_t>> playback_map = {};
         int signal_id[128]; //Char to int
     
     public:
@@ -124,7 +124,7 @@ class CustomReader_GPIO{
 
             if(this->playback_map.find(timestep) != this->playback_map.end()){
                 //If we have an update for this timestamp
-                std::map<int, int> actions = this->playback_map[timestep];
+                std::map<int, uint32_t> actions = this->playback_map[timestep];
                 for(const auto& [pin, val]: actions){
                     if(pin < 31){
                         //GPIO pin
@@ -136,16 +136,12 @@ class CustomReader_GPIO{
             return retval;
         }
 
-        bool update_fifo_state(int* retval, float time){
+        void update_fifo_state(FIFO* fifo, float time){
             const int timestep = round(time / dt);
 
             if(this->playback_map.find(timestep) != this->playback_map.end()){
                 //If we have an update for this timestamp
-                *retval = this->playback_map[timestep][FIFO_ID];
-                return true;
-            }
-            else {
-                return false;
+                fifo->push(this->playback_map[timestep][FIFO_ID], 32);
             }
         }
 };

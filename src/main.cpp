@@ -23,12 +23,14 @@ int main(){
     VCDWriter writer = VCDWriter("out/out.vcd");
     CustomReader_GPIO reader("in/in.test");
     GPIO gpio = GPIO(&writer, &reader, 133e6);
-    
+    reader.update_fifo_state(&TX, 0);
+
     StateMachine sm = StateMachine(0,0,1);
     sm.connect(&TX, &RX, &gpio, io_test_program_instructions);
     sm.conf_out(28,4); sm.conf_set(10,1);
 
     for(int i = 0; i < 100; i++){
+        reader.update_fifo_state(&TX, gpio.get_time());
         sm.run();
         gpio.next_time();
     }

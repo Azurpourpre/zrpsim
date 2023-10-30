@@ -62,8 +62,12 @@ class GPIO {
 
             this->t++;
             this->old_pinState = this->pinState;
-            this->pinState = this->reader->update_gpio_state(this->pinState, t*this->dt);
+            this->pinState = this->reader->update_gpio_state(this->pinState, this->get_time());
 
+        }
+
+        float get_time(){
+            return this->t*this->dt;
         }
 
     private:
