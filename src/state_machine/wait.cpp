@@ -2,7 +2,7 @@ void StateMachine::wait(const uint16_t IR){
     //Check condition
     bool pol = IR & (1 << 7);
     uint8_t index = IR & 0b11111;
-    bool verified;
+    bool verified = false;
 
     switch ((IR & (0b11 << 5)) >> 5) {
         case 0b00:

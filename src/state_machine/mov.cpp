@@ -1,9 +1,9 @@
 uint32_t reverseBits(uint32_t n) {
-    n = (n >> 1) & 0x55555555 | (n << 1) & 0xaaaaaaaa;
-    n = (n >> 2) & 0x33333333 | (n << 2) & 0xcccccccc;
-    n = (n >> 4) & 0x0f0f0f0f | (n << 4) & 0xf0f0f0f0;
-    n = (n >> 8) & 0x00ff00ff | (n << 8) & 0xff00ff00;
-    n = (n >> 16) & 0x0000ffff | (n << 16) & 0xffff0000;
+    n = ((n >> 1) & 0x55555555) | ((n << 1) & 0xaaaaaaaa);
+    n = ((n >> 2) & 0x33333333) | ((n << 2) & 0xcccccccc);
+    n = ((n >> 4) & 0x0f0f0f0f) | ((n << 4) & 0xf0f0f0f0);
+    n = ((n >> 8) & 0x00ff00ff) | ((n << 8) & 0xff00ff00);
+    n = ((n >> 16) & 0x0000ffff) | ((n << 16) & 0xffff0000);
     return n;
 }
 
@@ -59,7 +59,7 @@ void StateMachine::mov(const uint16_t IR){
     //Send to destination
     switch( (IR & 0b11100000) >> 5 ){
         case 0b000:
-            for(int i = 0; i < this->PINCTRL_OUT_COUNT; i++){
+            for(unsigned int i = 0; i < this->PINCTRL_OUT_COUNT; i++){
                 this->gpio->write_pin((this->PINCTRL_OUT_BASE + i)%31, source_value & 0b1);
                 source_value = source_value >> 1;
             }

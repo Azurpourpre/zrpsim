@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <bitset>
 
-typedef struct {
+typedef struct VCDSignal_t {
     uint8_t size;
     uint32_t mask;
     const char identifider;
@@ -21,7 +21,7 @@ class VCDWriter{
     private:
         std::ofstream outfile;
         char n_signal;
-        std::unordered_map<VCDSignal*, int> state; // Vector of all signals
+        std::unordered_map<VCDSignal*, uint32_t> state; // Vector of all signals
 
     public:
         VCDWriter(const char* filename){
@@ -82,12 +82,11 @@ class VCDWriter{
             }
         }
 
-        VCDSignal* create_signal(const uint8_t size, const char* wanted_name){
+        VCDSignal* create_signal(const uint8_t size, std::string wanted_name){
             // Instantiate signal
-                // We copy the name bc never trust input
-            char* name = (char*)malloc(sizeof(wanted_name)/sizeof(const char));
-            memcpy(name, wanted_name, sizeof(wanted_name)/sizeof(const char));
-
+            // Malloc the wanted name just in case
+            char* name = new char[wanted_name.length() + 1];
+            strncpy(name, wanted_name.c_str(), wanted_name.length());
             VCDSignal new_sig = {0, 0, (char)(n_signal + 64), name};
 
             if(size >= 32){
@@ -101,9 +100,8 @@ class VCDWriter{
             this->n_signal++;
 
             //Copy it to heap, for persistance
-            VCDSignal* rep = (VCDSignal*)malloc(sizeof(VCDSignal));
-            memcpy(rep, &new_sig, sizeof(VCDSignal));
-
+            VCDSignal* rep = new VCDSignal(new_sig);
+            
             this->state[rep] = 2;
 
             return rep;

@@ -7,6 +7,10 @@
 #include <string>
 #include <map>
 #include <regex>
+#include <cstdint>
+#include <cmath>
+
+#include "../registers.h"
 
 #define FIFO_ID 31
 
@@ -68,22 +72,22 @@ class CustomReader_GPIO{
                     // So we add the data to the playback list.
                     std::regex re_FIFO("\\$var wire 32 . FIFO \\$end"), re_Pin("\\$var wire 1 . pin_\\d{1,2} \\$end");
                     if(std::regex_match(line, re_Pin)){
-                        char id = line.c_str()[12];
+                        char id = line[12];
                         int pin_num = std::stoi(line.substr(18, 2));
 
                         //Sanitiy Check
                         if(pin_num > 30){
                             std::cerr << "Invalid Pin Number" << std::endl;
                         }
-                        else if(id < 33 || id > 127 || id == '0' || id == '1') {
+                        else if(id < 33 || id == '0' || id == '1') {
                             std::cerr << "Invalid Signal Identifier" << std::endl;
                         } else {
-                            this->signal_id[id] = pin_num;
+                            this->signal_id[(unsigned int)id] = pin_num;
                         }
                     }
                     else if(std::regex_match(line, re_FIFO)){
                         char id = line.c_str()[13];
-                        this->signal_id[id] = FIFO_ID;
+                        this->signal_id[(unsigned int)id] = FIFO_ID;
                     }
                 }
                 else if(std::regex_match(line, re_endheader)){
@@ -102,7 +106,7 @@ class CustomReader_GPIO{
                 }
                 if(std::regex_match(line, re_val)){
                     const int value = std::stoi(line, nullptr, 0);
-                    const int pin = signal_id[line.back()];
+                    const int pin = signal_id[(unsigned int)line.back()];
                     if(pin <= 30){
                         this->playback_map[time][pin] = value & 0b1;
                     }

@@ -60,7 +60,7 @@ class StateMachine {
 
         void conf_pin(unsigned int* pin_arr, size_t pin_arr_size){
             pin_mask = 0;
-            for(int i = 0; i < pin_arr_size; i++){
+            for(unsigned int i = 0; i < pin_arr_size; i++){
                 if(pin_arr[i] > 30){
                     std::cerr << "Pin " << std::to_string(pin_arr[i]) << " does not exist....";
                     return;

@@ -39,7 +39,7 @@ class FIFO {
             this->size += size;
         }
     
-        const uint32_t pull(const uint8_t size){
+        uint32_t pull(const uint8_t size){
             if (size > 32) {
                 std::cerr << "Can't pull more than 32 bits from the FIFO at once" << std::endl;
             }

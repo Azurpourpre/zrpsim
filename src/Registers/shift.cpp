@@ -27,11 +27,11 @@ class Shift{
             this->buffer = input;
         }
 
-        const uint32_t get(){
+        uint32_t get(){
             return this->buffer;
         }
 
-        const bool shift(const bool input){
+        bool shift(const bool input){
             // Shift the register according to self.direction
             // Input is the new bit being shifted in
             // Output is the overflow bit
@@ -45,14 +45,14 @@ class Shift{
             }
             else {
                 // Left shift
-                res = this->buffer & (const uint32_t)(1<<31);
+                res = this->buffer & (uint32_t)(1<<31);
                 this->buffer = (this->buffer << 1) + (input ? 1 : 0);
             }
 
             return res;
         }
 
-        const uint32_t shift(const uint32_t input, uint8_t bitcount){
+        uint32_t shift(const uint32_t input, uint8_t bitcount){
             // Shift the register according to self.direction
             // Input is the new bit being shifted in
             // Output is the overflow bit

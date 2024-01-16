@@ -8,7 +8,7 @@ void StateMachine::set(const uint16_t IR){
     switch( (IR & 0b11100000) >> 5){
         case 0b000:
         case 0b100:
-            for(int i = 0; i < this->PINCTRL_SET_COUNT; i++){
+            for(unsigned int i = 0; i < this->PINCTRL_SET_COUNT; i++){
                 this->gpio->write_pin(pin, data);
                 data = data >> 1;
                 pin = (pin + 1) % 31;

@@ -23,12 +23,18 @@ class GPIO {
             this->pinState = 0;
             this->old_pinState = 0;
 
-            writer->write_header(this->freq_to_ts(freq));
+            writer->write_header(this->freq_to_ts(freq).c_str());
 
             this->dt = 1/freq;
             this->t = 1;
 
 
+        }
+
+        ~GPIO(){
+            for(int i = 0; i < 30; i++){
+                delete this->siglist[i];
+            }
         }
 
         void write_pin(unsigned int pin, const bool state){
@@ -79,7 +85,7 @@ class GPIO {
         uint32_t old_pinState;
         VCDSignal* siglist[30];
 
-        const char* freq_to_ts(const float freq){
+        std::string freq_to_ts(const float freq){
             std::string rep;
             if(freq < 1){
                 // freq < 1Hz then rep is in seconds
@@ -110,7 +116,7 @@ class GPIO {
                 rep = std::string("1s");
             }
 
-            return rep.c_str();
+            return rep;
         }
 };
 

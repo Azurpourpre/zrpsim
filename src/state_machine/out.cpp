@@ -13,7 +13,7 @@ void StateMachine::out(const uint16_t IR){
         case 0b100:
             pinout = this->OSR->shift(0, bitcount);
             pin = this->PINCTRL_OUT_BASE;
-            for(int i = 0; i < this->PINCTRL_OUT_COUNT; i++){
+            for(unsigned int i = 0; i < this->PINCTRL_OUT_COUNT; i++){
                 this->gpio->write_pin(pin, pinout & 0b1);
                 pinout = pinout >> 1;
                 pin = (pin + 1)%31;
