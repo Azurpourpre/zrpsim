@@ -47,7 +47,14 @@ class VCDWriter{
             this->outfile << "$scope module logic $end" << std::endl;
 
             for(auto [pSig, _] : this->state){
-                this->outfile << "$var wire " << std::to_string(pSig->size) << " " << pSig->identifider << " " << pSig->name << " $end" << std::endl;
+                std::string to_write = "$var wire ";
+                to_write += std::to_string(pSig->size);
+                to_write += " ";
+                to_write += pSig->identifider;
+                to_write += " ";
+                to_write += std::string(pSig->name);
+                to_write += " $end";
+                this->outfile << to_write << std::endl;
             }
 
             this->outfile << "$upscope $end" << std::endl;
@@ -87,6 +94,8 @@ class VCDWriter{
             // Malloc the wanted name just in case
             char* name = new char[wanted_name.length() + 1];
             strncpy(name, wanted_name.c_str(), wanted_name.length());
+            name[wanted_name.length()] = 0;
+
             VCDSignal new_sig = {0, 0, (char)(n_signal + 64), name};
 
             if(size >= 32){

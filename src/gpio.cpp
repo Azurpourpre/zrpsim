@@ -17,7 +17,7 @@ class GPIO {
 
             for(int i = 0; i < 30; i++){
                 const std::string name = "Pin_" + std::to_string(i);
-                this->siglist[i] = writer->create_signal(1, name.c_str());
+                this->siglist[i] = writer->create_signal(1, name);
             }
 
             this->pinState = 0;
@@ -33,6 +33,7 @@ class GPIO {
 
         ~GPIO(){
             for(int i = 0; i < 30; i++){
+                delete[] this->siglist[i]->name;
                 delete this->siglist[i];
             }
         }

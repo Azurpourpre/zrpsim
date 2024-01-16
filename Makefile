@@ -1,5 +1,5 @@
 CC := g++
-CFLAGS := -Wall -Wextra -g
+CFLAGS := -Wall -Wextra -g -fsanitize=address
 LDFLAGS := 
 
 build_main:
