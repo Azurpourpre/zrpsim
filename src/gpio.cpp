@@ -69,12 +69,27 @@ class GPIO {
 
             this->t++;
             this->old_pinState = this->pinState;
-            this->pinState = this->reader->update_gpio_state(this->pinState, this->get_time());
+            if(reader != NULL)
+                this->pinState = this->reader->update_gpio_state(this->pinState, this->get_time());
 
         }
 
         float get_time(){
             return this->t*this->dt;
+        }
+
+        uint32_t get_pinState(){
+            return this->pinState;
+        }
+
+        bool get_pin(uint8_t pinNumber){
+            if(pinNumber <= 30){
+                return this->pinState & (1 << pinNumber);
+            }
+            else{
+                std::cerr << "Tried to query state of invalid pin" << std::endl;
+                return false;
+            }
         }
 
     private:

@@ -6,10 +6,10 @@ void StateMachine::wait(const uint16_t IR){
 
     switch ((IR & (0b11 << 5)) >> 5) {
         case 0b00:
-            TODO("INPUT GPIO");
+            verified = (this->gpio->get_pin(index) == pol);
             break;
         case 0b01:
-            TODO("INPUT GPIO");
+            verified = (this->gpio->get_pin((index + this->PINCTRL_IN_BASE)%32) == pol);
             break;
         case 0b10:
             TODO("IRQ");

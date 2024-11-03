@@ -13,10 +13,8 @@ class StateMachine {
 
     public:
         StateMachine(bool ISR_dir, bool OSR_dir, const unsigned int clock_divisor){
-            Shift ISR = Shift(ISR_dir);
-            Shift OSR = Shift(OSR_dir);
-            this->ISR = &ISR;
-            this->OSR = &OSR;
+            this->OSR = new Shift(OSR_dir);
+            this->ISR = new Shift(ISR_dir);
 
             this->OSR_counter = 0; //Default value ?
             this->ISR_counter = 0;
@@ -30,6 +28,11 @@ class StateMachine {
             this->RX_FIFO = nullptr;
             this->progmem = nullptr;
             this->gpio = nullptr;
+        }
+
+        ~StateMachine(){
+            delete this->ISR;
+            delete this->OSR;
         }
 
         void connect(FIFO* TX, FIFO* RX, GPIO* gpio, const instr* progmem) {
@@ -55,6 +58,10 @@ class StateMachine {
                 this->execute(IR);
 
             }
+        }
+
+        uint32_t get_pc(){
+            return this->PC;
         }
 
 
@@ -182,7 +189,7 @@ class StateMachine {
             void mov(const uint16_t IR);
             void set(const uint16_t IR);
 
-            void irq(const uint16_t IR){
+            void irq(__attribute__((unused))const uint16_t IR){
                 TODO("IRQ");
 
                 //Update PC

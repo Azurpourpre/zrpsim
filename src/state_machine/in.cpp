@@ -8,7 +8,7 @@ void StateMachine::in(const uint16_t IR){
 
     switch ((IR & 0b11100000) >> 5) {
         case 0b000:
-            TODO("INPUT GPIO");
+            this->ISR->shift(this->gpio->get_pinState(), bitcount);
             break;
         case 0b001:
             this->ISR->shift(this->X, bitcount);

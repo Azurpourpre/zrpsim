@@ -27,7 +27,7 @@ void StateMachine::jmp(const uint16_t IR){
             verified = (X!=Y);
             break;
         case 0b110:
-            TODO("INPUT GPIO");
+            verified = (this->gpio->get_pin(this->EXECCTRL_JMP_PIN) == true);
             break;
         case 0b111:
             TODO("SHIFT REGISTER COUNTER");
@@ -38,5 +38,8 @@ void StateMachine::jmp(const uint16_t IR){
 
     if (verified) {
         this->PC = IR & 0b11111;
+    }
+    else{
+        this->PC++;
     }
 }

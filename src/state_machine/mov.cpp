@@ -13,9 +13,11 @@ void StateMachine::mov(const uint16_t IR){
 
     //Get the source
     uint32_t source_value;
+    Shift shifter(1); // Only used for 0b000
     switch (IR & 0b111){
         case 0b000:
-            TODO("INPUT GPIO");
+            shifter.fill(this->gpio->get_pinState());
+            source_value = shifter.shift(this->PINCTRL_IN_BASE);
             break;
         case 0b001:
             source_value = this->X;
@@ -60,7 +62,7 @@ void StateMachine::mov(const uint16_t IR){
     switch( (IR & 0b11100000) >> 5 ){
         case 0b000:
             for(unsigned int i = 0; i < this->PINCTRL_OUT_COUNT; i++){
-                this->gpio->write_pin((this->PINCTRL_OUT_BASE + i)%31, source_value & 0b1);
+                this->gpio->write_pin((this->PINCTRL_OUT_BASE + i)%32, source_value & 0b1);
                 source_value = source_value >> 1;
             }
             break;

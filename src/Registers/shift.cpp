@@ -56,9 +56,7 @@ class Shift{
             // Shift the register according to self.direction
             // Input is the new bit being shifted in
             // Output is the overflow bit
-
             uint32_t res;
-
             uint32_t mask = 0;
 
             if(this->direction){
