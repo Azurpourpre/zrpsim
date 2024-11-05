@@ -1,12 +1,6 @@
-#ifndef _UTILS
-#define _UTILS
+#pragma once
 
 #include <iostream>
 
 #define FILL(arr, val) memset(arr, val, sizeof(arr))
-
-void TODO(const char* s){
-    std::cerr << s << " not implemented yet !" << std::endl;
-}
-
-#endif
+#define TODO(s) std::cerr << s << " not implemented yet !" << std::endl;

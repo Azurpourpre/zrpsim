@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "state_machine.cpp"
-#include "gpio.cpp"
+#include "state_machine.h"
+#include "gpio.h"
 
 static const uint16_t io_test_program_instructions[] = {
     0xe024,

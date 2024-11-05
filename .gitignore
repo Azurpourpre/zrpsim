@@ -1,5 +1,6 @@
 out/**
 test/**
+objs/**
 .vscode
 !test/*.asm
 zrpsim

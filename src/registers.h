@@ -1,2 +1,2 @@
-#include "Registers/fifo.cpp"
-#include "Registers/shift.cpp"
+#include "Registers/fifo.h"
+#include "Registers/shift.h"
