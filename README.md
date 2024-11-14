@@ -9,9 +9,10 @@ This project is still very young, so it might crash, and a lot of features are s
 - [x]  Registers and FIFO
 - [x]  State machine fetch, decode, execute instructions
 - [x]  GPIO output
-- [ ]  GPIO input
-    + [ ]  Input from file
-- [ ]  Interruptions
+    + [x] Output to VCD file
+- [x]  GPIO input
+    + [x]  Input from file
+- [ ] Interruptions
 - [ ] Status Registers
 - [ ] Autopush
 - [ ] Wrapping
