@@ -1,7 +1,5 @@
 //We use a custom input file format here
 
-#include "../registers.h"
-
 #define FIFO_ID 31
 
 CustomReader_GPIO::CustomReader_GPIO(const char* filename){
@@ -19,13 +17,20 @@ CustomReader_GPIO::CustomReader_GPIO(const char* filename){
         if(std::regex_match(line, re_timescale)){
             // Timescale token
             // So we affect the value to dt
-            const std::regex re_unit("(s|ms|us|ns|ps|fs)"), re_num("[0-9]+");
+            const std::regex re_val("[0-9]+(m|n|p|f)?s");
 
             std::smatch match;
-            std::regex_search(line, match, re_num);
-            const int number = std::stoi(match.str());
-            std::regex_search(line, match, re_unit);
-            const std::string unit = match.str();
+            std::regex_search(line, match, re_val);
+
+            int number = 0;
+            std::string unit = "";
+            
+            for(char& c : match.str()){
+                if(('0' <= c) && (c <= '9'))
+                    number = (number * 10) + (c - '0');
+                else 
+                    unit += c;
+            }
 
             if(unit == "s"){
                 this->dt = number;
@@ -86,8 +91,8 @@ CustomReader_GPIO::CustomReader_GPIO(const char* filename){
             time = std::stoi(line.substr(1));
             playback_map[time] = {};
         }
-        if(std::regex_match(line, re_val)){
-            const int value = std::stoi(line, nullptr, 0);
+        else if(std::regex_match(line, re_val)){
+            const unsigned long value = std::stoul(line, nullptr, 0);
             const int pin = signal_id[(unsigned int)line.back()];
             if(pin <= 30){
                 this->playback_map[time][pin] = value & 0b1;
@@ -97,6 +102,8 @@ CustomReader_GPIO::CustomReader_GPIO(const char* filename){
             }
         }
     }
+    
+    this->max_time = (time + 1)*this->dt;
 
     //Close file
     this->infile.close();
@@ -125,8 +132,11 @@ uint32_t CustomReader_GPIO::update_gpio_state(uint32_t pinmap, float time){
 void CustomReader_GPIO::update_fifo_state(FIFO* fifo, float time){
     const int timestep = round(time / dt);
 
-    if(this->playback_map.find(timestep) != this->playback_map.end()){
-        //If we have an update for this timestamp
-        fifo->push(this->playback_map[timestep][FIFO_ID], 32);
+    if(this->playback_map.find(timestep) != this->playback_map.end() && this->playback_map.at(timestep).find(FIFO_ID) != this->playback_map.at(timestep).end()){
+        fifo->push(this->playback_map.at(timestep).at(FIFO_ID), 32);
     }
+}
+
+float CustomReader_GPIO::get_max_time(){
+    return this->max_time;
 }

@@ -4,3 +4,4 @@ objs/**
 .vscode
 !test/*.asm
 zrpsim
+log.txt

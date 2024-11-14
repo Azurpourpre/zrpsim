@@ -1,14 +1,13 @@
 #include "../gpio.h"
 #include "../utils.cpp"
-#include <ctime>
+#include "../registers.h"
 #include <iomanip>
 #include <cstring>
-#include <bitset>
 #include <iostream>
 #include <string>
 #include <regex>
 #include <cmath>
-#include "vcd.cpp"
+#include "vcdwriter.cpp"
 #include "input.cpp"
 
 std::string freq_to_ts(const float freq){
@@ -48,27 +47,26 @@ std::string freq_to_ts(const float freq){
 GPIO::GPIO(VCDWriter* writer, CustomReader_GPIO* reader, const float freq){
     this->writer = writer;
     this->reader = reader;
-
-    for(int i = 0; i < 30; i++){
-        const std::string name = "Pin_" + std::to_string(i);
-        this->siglist[i] = writer->create_signal(1, name);
-    }
-
     this->pinState = 0;
     this->old_pinState = 0;
-
-    writer->write_header(freq_to_ts(freq).c_str());
-
     this->dt = 1/freq;
     this->t = 1;
 
-
+    if(this->writer != NULL){
+        for(int i = 0; i < 30; i++){
+            const std::string name = "Pin_" + std::to_string(i);
+            this->siglist[i] = this->writer->create_signal(1, name);
+        }
+        this->writer->write_header(freq_to_ts(freq).c_str());
+    }
 }
 
 GPIO::~GPIO(){
-    for(int i = 0; i < 30; i++){
-        delete[] this->siglist[i]->name;
-        delete this->siglist[i];
+    if(this->writer != NULL){
+        for(int i = 0; i < 30; i++){
+            delete[] this->siglist[i]->name;
+            delete this->siglist[i];
+        }
     }
 }
 
@@ -85,27 +83,33 @@ void GPIO::next_time(){
     uint32_t diff = pinState ^ old_pinState;
     unsigned int pin = 0;
 
-    this->writer->write_time(std::to_string(t).c_str());
+    if(this->writer != NULL && diff != 0){
+        this->write_time();
 
-    while((diff != 0) && (pin < 30)){
-        // We have a changed bit !
-        if(diff & 0b1){
-            //The bit changed is the current pin
-            this->writer->write_value(
-                this->siglist[pin],
-                (pinState >> pin) & 0b1
-            );
+        while((diff != 0) && (pin < 30)){
+            // We have a changed bit !
+            if(diff & 0b1){
+                //The bit changed is the current pin
+                this->writer->write_value(
+                    this->siglist[pin],
+                    (pinState >> pin) & 0b1
+                );
+            }
+
+            pin++;
+            diff = diff >> 1;
         }
-
-        pin++;
-        diff = diff >> 1;
     }
 
-    this->t++;
     this->old_pinState = this->pinState;
     if(reader != NULL)
         this->pinState = this->reader->update_gpio_state(this->pinState, this->get_time());
 
+    this->t++;
+}
+
+void GPIO::write_time(){
+    this->writer->write_time(std::to_string(this->t).c_str());
 }
 
 float GPIO::get_time(){

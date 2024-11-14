@@ -1,8 +1,9 @@
 CC=g++
-CFLAGS=-Wall -Wextra -ggdb -fsanitize=address
+CFLAGS=-Wall -Wextra -ggdb -fsanitize=address -std=c++20
 
 OBJDIR=objs
-FILES=$(addprefix $(OBJDIR)/, fifo.o shift.o gpio.o state_machine.o main.o)
+OBJECTS=fifo.o shift.o gpio.o state_machine.o main.o
+FILES=$(addprefix $(OBJDIR)/, $(OBJECTS))
 
 .PHONY=build clean
 
@@ -16,7 +17,7 @@ clean:
 $(OBJDIR)/%.o: src/*/%.cpp $(OBJDIR) 
 	$(CC) -c $< $(CFLAGS) -o $@
 
-$(OBJDIR)/%.o: src/%.cpp $(OBJDIR) 
+$(OBJDIR)/main.o: src/main.cpp $(OBJDIR) 
 	$(CC) -c $< $(CFLAGS) -o $@
 
 $(OBJDIR):

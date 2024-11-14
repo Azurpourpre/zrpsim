@@ -3,12 +3,12 @@ void StateMachine::push(const uint16_t IR){
     this->stall_counter = (IR & delay_sideset_mask) >> 8;
 
     if ( (IR & 0b1000000) && (this->ISR_counter >= 32) ){
-        // If the isFull bit is set and ISR is below threshold
+        // If the isFull bit is set and ISR is above threshold
         TODO("AutoPush");
         return;
 
-    } else if ( (IR & 0b100000) && (this->RX_FIFO->get_size() <= 3*32) ){
-        // Block bit is set and TX FIFO is empty
+    } else if ( (IR & 0b100000) && (this->RX_FIFO->get_size() == 4*32) ){
+        // Block bit is set and RX_FIFO is full
         // So stall
         return;
 

@@ -1,5 +1,6 @@
 #include "../state_machine.h"
 #include <iostream>
+#include <bit>
 
 StateMachine::StateMachine(bool ISR_dir, bool OSR_dir, const unsigned int clock_divisor){
     this->OSR = new Shift(OSR_dir);
@@ -102,8 +103,13 @@ void StateMachine::conf_set(unsigned int pin, unsigned int count){
 void StateMachine::print(){
     std::cout << "### NEW STEP ###" << std::endl;
     std::cout << "PC : " << this->PC << std::endl;
+    std::cout << "STALL : " << (int)this->stall_counter << std::endl;
     std::cout << "X : " << std::hex << this->X << std::endl;
     std::cout << "Y : " << std::hex << this->Y << std::endl;
+    std::cout << "ISR : " << std::hex << this->ISR->get() << std::endl;
+    std::cout << "OSR : " << std::hex << this->OSR->get() << std::endl;
+    std::cout << "TX FIFO : "; this->TX_FIFO->print();
+    std::cout << "RX FIFO : "; this->RX_FIFO->print();
 }
 
 void StateMachine::execute(instr IR){

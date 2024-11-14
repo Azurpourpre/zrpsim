@@ -20,10 +20,11 @@ class CustomReader_GPIO{
         float get_dt();
         uint32_t update_gpio_state(uint32_t pinmap, float time);
         void update_fifo_state(FIFO* fifo, float time);
+        float get_max_time();
 
     private:
         std::ifstream infile;
-        float dt = 1;
+        float dt = 1, max_time;
         std::map<int, std::map<int, uint32_t>> playback_map = {};
         int signal_id[128]; //Char to int
     
@@ -50,6 +51,7 @@ class GPIO {
         ~GPIO();
         void write_pin(unsigned int pin, const bool state);
         void next_time();
+        void write_time();
         float get_time();
         uint32_t get_pinState();
         bool get_pin(uint8_t pinNumber);

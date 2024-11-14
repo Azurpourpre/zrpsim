@@ -15,7 +15,7 @@ void VCDWriter::write_header(const char* timescale){
     this->outfile << "    " << std::put_time(tm, "%d %m %Y") << std::endl;
     this->outfile << "$end" << std::endl;
     this->outfile << "$version" << std::endl;
-    this->outfile << "    ZRarray PIO, RP2040 PIO emulator" << std::endl;
+    this->outfile << "    ZRPIO, RP2040 PIO emulator" << std::endl;
     this->outfile << "$end" << std::endl;
     this->outfile << "$timescale " << timescale << " $end" << std::endl;
     this->outfile << "$scope module logic $end" << std::endl;
